@@ -1,42 +1,36 @@
 package com.example.a1.myapp;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+//import android.util.ArrayMap;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
-import android.view.View.OnClickListener;
 
-import java.sql.Time;
-import java.util.Timer;
-import java.util.TimerTask;
+import static java.util.Arrays.*;
+
+import java.lang.String;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import java.util.logging.LogRecord;
-import java.util.concurrent.TimeUnit;
-
-import android.app.Activity;
-import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
-import static com.example.a1.myapp.R.color.colorAccent;
-import static com.example.a1.myapp.R.color.screenBlack;
-import static com.example.a1.myapp.R.color.screenGreen;
-import static com.example.a1.myapp.R.color.screenWhite;
-import static com.example.a1.myapp.R.color.secondary_text;
-import static com.example.a1.myapp.R.id.text_v;
+import static java.util.Arrays.binarySearch;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,12 +40,17 @@ public class MainActivity extends AppCompatActivity {
 
     TextView hTextView;
     Button startButton ;
-    Handler h;
+    Handler handler;
     private EditText editText;
+    String text_input;
 
-    ArrayMap<String, String> arrayMap = new ArrayMap<>();
+    Fregment_flash fregment_flash;
+
+  final   ArrayMap<String, String> arrayMap = new ArrayMap<>();
+
 
     private static final String TAG = "myLogs";
+    FragmentTransaction fragmentTransaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,15 +59,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         startButton = (Button)findViewById(R.id.button);
-        hTextView = (TextView)findViewById(text_v);
+        hTextView = (TextView)findViewById(R.id.text_v);
         editText = (EditText) findViewById(R.id.editTextActMain);
 
         mRelativeLayout=(RelativeLayout) findViewById(R.id.activity_main) ;
         mTwolinear=(ConstraintLayout) findViewById(R.id.activity_two) ;
 
+        final Intent intent = new Intent(MainActivity.this,ActivityTwo.class);
+
+        fregment_flash=new Fregment_flash();
+
         arrayMap.put("а", "*--");
         arrayMap.put("б", "-***");
-        arrayMap.put("в", "*-- ");
+        arrayMap.put("в", "*--*");
         arrayMap.put("г", "--*");
         arrayMap.put("д", "-** ");
         arrayMap.put("е", "*");
@@ -112,12 +115,10 @@ public class MainActivity extends AppCompatActivity {
         arrayMap.put("9", "----*");
         arrayMap.put(" ", "_");
 
-
-        h=new Handler() {
+        handler=new Handler() {
 
             public  void  handleMessage(android.os.Message msg){
                 mRelativeLayout.setBackgroundColor(getResources().getColor(msg.what));
-               // mTwolinear.setBackgroundColor(getResources().getColor(msg.what));
                 Log.d(TAG, "STATUS_NONE! "+ msg.what);
             }
         };
@@ -125,63 +126,29 @@ public class MainActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 Thread t=new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        text_input=editText.getText().toString();
 
-                    for (int j=0; j<editText.getText().toString().length();j++){
+                        String inputText="";
+                        for(int i=0; i<text_input.length(); i++){
 
-                    for(int g=0; g<arrayMap.size();g++) {
-                        if(String.valueOf(editText.getText().toString().charAt(j)).equals(arrayMap.keyAt(g))){
-
-                            for( int i=0; i<arrayMap.valueAt(g).length();i++){
-
-                                switch (arrayMap.valueAt(g).charAt(i)) {
-                                    case '-':{
-                                        h.sendEmptyMessage(screenWhite);
-                                        text_output(1000);
-                                        h.sendEmptyMessage(screenBlack);
-                                        text_output(500);
-                                        break;
-                                    }
-                                    case '*':{
-                                        h.sendEmptyMessage(screenWhite);
-                                        text_output(2000);
-                                        h.sendEmptyMessage(screenBlack);
-                                        text_output(500);
-                                        break;
-                                    }
-
-                                    case '_':{
-                                        text_output(4000);
-                                        break;
-                                    }
-
-                                    default:{
-                                        h.sendEmptyMessage(secondary_text);
-                                        break;
-                                    }
-                                }
+                            String key=String.valueOf(text_input.charAt(i));
+                            if(arrayMap.containsKey(key)){
+                                inputText=inputText.concat(arrayMap.get(key)+"_");
+                                Log.d(TAG, "arrayMap.get! "+ arrayMap.get(key));
                             }
                         }
-                    }
-                }
-                    }
 
+                        intent.putExtra("array_key",inputText);
+                        startActivity(intent);
+                    }
                 });
                 t.start();
             }
         });
     }
 
-    public void text_output(int sec){
-        try {
-
-            TimeUnit.MILLISECONDS.sleep(sec);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }
